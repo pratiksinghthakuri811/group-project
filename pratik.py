@@ -70,7 +70,6 @@ def delete_player():
         print("No data file found.\n")
 
 
-# ✅ NEW: Search Player
 def search_player():
     search_value = input("Enter Jersey Number or Name to search: ").lower()
 
@@ -105,7 +104,7 @@ def search_player():
         print("No data file found.\n")
 
 
-# ✅ NEW: Top Scorer
+# top scorer
 def top_scorer():
     try:
         with open(FILE_NAME, "r") as file:
