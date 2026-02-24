@@ -23,15 +23,14 @@ def add_player():
 def view_players():
     try:
         with open(FILE_NAME, "r") as file:
-            data = file.readlines()
+            lines = file.readlines()
 
-            if not data:
+            if not lines:
                 print("No players found.\n")
                 return
 
-            for line in data:
+            for line in lines:
                 player = line.strip().split(",")
-
                 print("\nJersey:", player[0])
                 print("Name:", player[1])
                 print("Age:", player[2])
@@ -40,6 +39,45 @@ def view_players():
                 print("Goals:", player[5])
                 print("Injury:", player[6])
                 print("Suspension:", player[7])
+
+    except FileNotFoundError:
+        print("No data file found.\n")
+
+
+# ✅ UPDATE PLAYER
+def update_player():
+    jersey_update = input("Enter Jersey Number to update: ")
+
+    try:
+        with open(FILE_NAME, "r") as file:
+            lines = file.readlines()
+
+        with open(FILE_NAME, "w") as file:
+            found = False
+
+            for line in lines:
+                player = line.strip().split(",")
+
+                if player[0] == jersey_update:
+                    found = True
+                    print("Enter new details:")
+
+                    player[1] = input("New Name: ")
+                    player[2] = input("New Age: ")
+                    player[3] = input("New Position: ")
+                    player[4] = input("New Fitness: ")
+                    player[5] = input("New Goals: ")
+                    player[6] = input("New Injury: ")
+                    player[7] = input("New Suspension: ")
+
+                    file.write(",".join(player) + "\n")
+                else:
+                    file.write(line)
+
+        if found:
+            print("✅ Player updated successfully!\n")
+        else:
+            print("❌ Player not found.\n")
 
     except FileNotFoundError:
         print("No data file found.\n")
@@ -70,6 +108,7 @@ def delete_player():
         print("No data file found.\n")
 
 
+# ✅ NEW: Search Player
 def search_player():
     search_value = input("Enter Jersey Number or Name to search: ").lower()
 
@@ -77,75 +116,59 @@ def search_player():
         with open(FILE_NAME, "r") as file:
             lines = file.readlines()
 
-            found = False
-
+            print("\n🚑 Injured Players:")
             for line in lines:
                 player = line.strip().split(",")
-
-                jersey = player[0]
-                name = player[1].lower()
-
-                if search_value == jersey or search_value == name:
-                    print("\n✅ Player Found:")
-                    print("Jersey:", player[0])
-                    print("Name:", player[1])
-                    print("Age:", player[2])
-                    print("Position:", player[3])
-                    print("Fitness:", player[4])
-                    print("Goals:", player[5])
-                    print("Injury:", player[6])
-                    print("Suspension:", player[7])
-                    found = True
-
-            if not found:
-                print("❌ Player not found.\n")
+                if player[6].lower() == "yes":
+                    print("Jersey:", player[0], "| Name:", player[1])
 
     except FileNotFoundError:
         print("No data file found.\n")
 
 
-# top scorer
+# ✅ NEW: Top Scorer
 def top_scorer():
     try:
         with open(FILE_NAME, "r") as file:
             lines = file.readlines()
 
-            if not lines:
-                print("No players found.\n")
-                return
-
-            top_player = None
-            max_goals = -1
-
+            print("\n⛔ Suspended Players:")
             for line in lines:
                 player = line.strip().split(",")
-                goals = int(player[5])
-
-                if goals > max_goals:
-                    max_goals = goals
-                    top_player = player
-
-            print("\n🏆 Top Scorer:")
-            print("Jersey:", top_player[0])
-            print("Name:", top_player[1])
-            print("Goals:", top_player[5])
-            print()
+                if player[7].lower() == "yes":
+                    print("Jersey:", player[0], "| Name:", player[1])
 
     except FileNotFoundError:
         print("No data file found.\n")
 
 
-def total_team_goals():
+# ✅ SORT BY GOALS
+def sort_by_goals():
     try:
         with open(FILE_NAME, "r") as file:
             lines = file.readlines()
 
-            total = 0
+            players = []
             for line in lines:
                 player = line.strip().split(",")
-                total += int(player[5])
+                players.append(player)
 
-            print("⚽ Total Team Goals:", total, "\n")
+            players.sort(key=lambda x: int(x[5]), reverse=True)
+
+            print("\n📊 Players Sorted by Goals:")
+            for player in players:
+                print("Name:", player[1], "| Goals:", player[5])
+
+    except FileNotFoundError:
+        print("No data file found.\n")
+
+
+# ✅ COUNT TOTAL PLAYERS
+def total_players():
+    try:
+        with open(FILE_NAME, "r") as file:
+            lines = file.readlines()
+            print("👥 Total Players:", len(lines), "\n")
 
     except FileNotFoundError:
         print("No data file found.\n")
@@ -153,14 +176,16 @@ def total_team_goals():
 
 def menu():
     while True:
-        print("⚽ Football Player Management")
+        print("\n⚽ Football Player Management")
         print("1. Add Player")
         print("2. View Players")
-        print("3. Delete Player")
-        print("4. Search Player")
-        print("5. Show Top Scorer")
-        print("6. Total Team Goals")
-        print("7. Exit")
+        print("3. Update Player")
+        print("4. Delete Player")
+        print("5. Show Injured Players")
+        print("6. Show Suspended Players")
+        print("7. Sort Players by Goals")
+        print("8. Total Players")
+        print("9. Exit")
 
         choice = input("Enter choice: ")
 
@@ -169,14 +194,18 @@ def menu():
         elif choice == "2":
             view_players()
         elif choice == "3":
-            delete_player()
+            update_player()
         elif choice == "4":
-            search_player()
+            delete_player()
         elif choice == "5":
-            top_scorer()
+            show_injured()
         elif choice == "6":
-            total_team_goals()
+            show_suspended()
         elif choice == "7":
+            sort_by_goals()
+        elif choice == "8":
+            total_players()
+        elif choice == "9":
             print("Exiting...")
             break
         else:
