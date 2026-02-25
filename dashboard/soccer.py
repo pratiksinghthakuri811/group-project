@@ -3,35 +3,31 @@ from PIL import Image, ImageTk
 from player_page import open_player_page
 from team_page import team_management_page
 
-# ---------------- MAIN DASHBOARD ----------------
+
 root = tk.Tk()
-root.title("Manager Dashboard")
-root.geometry("1000x750")
-root.config(bg="#f0f0f0")
+root.title("Soccer Manager Pro")
+root.geometry("1100x700")
+root.configure(bg="#2C3E50")
 
-# Background image
-image = Image.open("image.png") #make image full screen and set as background
-image = image.resize((root.winfo_screenwidth(), root.winfo_screenheight()))
-bg_image = ImageTk.PhotoImage(image)
+# --- HEADER SECTION ---
+header_frame = tk.Frame(root, bg="#34495E", height=150)
+header_frame.pack(fill="x", side="top")
 
-bg_label = tk.Label(root, image=bg_image)
-bg_label.place(x=0, y=0, relwidth=1, relheight=1)
+title_label = tk.Label(header_frame,text="⚽ SOCCER MANAGER PRO",font=("Helvetica", 32, "bold"),fg="#ECF0F1",bg="#3498DB")
+title_label.pack(pady=40)
 
-# Dashboard title
-title = tk.Label(root, text="Dashboard", font=("Arial", 22, "bold"), bg="#f0f0f0")
-title.pack(pady=30)
 
-# ---------------- BUTTONS ----------------
-btn_player = tk.Button(root, text="Player Management",width=25, height=2, font=("Arial", 12),bg="#39268B", fg="white",command=lambda: open_player_page(root))
-btn_player.pack(pady=10)
+# --- BUTTON LIST ---
+btn_player = tk.Button(root, text="Player Management",width=25, height=2, font=("Arial", 12),bg="#3498DB", fg="white",command=lambda: open_player_page(root))
+btn_player.pack(pady=20)
 
-btn_team = tk.Button(root, text="Team Management", width=25, height=2,font=("Arial", 12), bg="#39268B", fg="white", command=lambda: team_management_page())
-btn_team.pack(pady=10)
+btn_team = tk.Button(root, text="Team Management", width=25, height=2,font=("Arial", 12), bg="#3498DB", fg="white", command=lambda: team_management_page())
+btn_team.pack(pady=20)
 
-btn_match = tk.Button(root, text="Match Management", width=25, height=2,font=("Arial", 12), bg="#39268B", fg="white")
-btn_match.pack(pady=10)
+btn_match = tk.Button(root, text="Match Management", width=25, height=2,font=("Arial", 12), bg="#3498DB", fg="white")
+btn_match.pack(pady=20)
 
-btn_tournament = tk.Button(root, text="Tournament Management", width=25, height=2,font=("Arial", 12), bg="#39268B", fg="white")
-btn_tournament.pack(pady=10)
+btn_tournament = tk.Button(root, text="Tournament Management", width=25, height=2,font=("Arial", 12), bg="#3498DB", fg="white")
+btn_tournament.pack(pady=20)
 
 root.mainloop()
