@@ -32,14 +32,13 @@ def open_player_page(root):
     # If calling from a main menu, use Toplevel; if standalone, this handles it.
     window = tk.Toplevel(root) if root else tk.Tk()
     window.title("Player Management")
-    window.geometry("900x700")
+    window.geometry("1000x750")
     window.config(bg="#f0f4f7")
 
-    # ---------------- TITLE ----------------
-    tk.Label(window, text="⚽ Player Management", font=("Helvetica", 22, "bold"), 
-             bg="#f0f4f7", fg="#2C3E50").pack(pady=15)
+    #TITLE
+    tk.Label(window, text="⚽ Player Management", font=("Helvetica", 22, "bold"),bg="#f0f4f7", fg="#2C3E50").pack(pady=15)
 
-    # ---------------- ENTRY FRAME ----------------
+    #ENTRY FRAME
     entry_frame = tk.Frame(window, bg="#ffffff", bd=1, relief="solid")
     entry_frame.pack(pady=10, padx=15, fill="x")
 
@@ -55,7 +54,7 @@ def open_player_page(root):
         ent.grid(row=row, column=col*2 + 1, padx=5, pady=8, sticky="ew")
         entries[label] = ent
 
-    # ---------------- DATABASE FUNCTIONS ----------------
+    # DATABASE FUNCTIONS
     def refresh_table():
         for row in player_table.get_children():
             player_table.delete(row)
@@ -71,6 +70,7 @@ def open_player_page(root):
     def clear_entries():
         for entry in entries.values():
             entry.delete(0, tk.END)
+
 
     def add_player():
         data = {k: v.get().strip() for k, v in entries.items()}
@@ -98,6 +98,8 @@ def open_player_page(root):
             messagebox.showwarning("Duplicate", "Jersey number already exists!", parent=window)
         except ValueError:
             messagebox.showerror("Error", "Jersey, Age, and Goals must be numbers!", parent=window)
+        conn.close()
+
 
     def delete_player():
         selected = player_table.focus()
@@ -134,6 +136,51 @@ def open_player_page(root):
                     
             except Exception as e:
                 messagebox.showerror("Error", f"Database error: {e}", parent=window)
+            conn.close()
+    
+    # def update_player():
+    #     # Get the ID (Jersey Number) to know which player to update
+    #     jersey_val = entries["Jersey Number"].get().strip()
+        
+    #     if not jersey_val:
+    #         messagebox.showwarning("Warning", "Please enter a Jersey Number to update!", parent=window)
+    #         return
+
+    #     try:
+    #         conn = sqlite3.connect(DB_NAME)
+    #         cursor = conn.cursor()
+            
+    #         # SQL UPDATE command targeting the Jersey Number
+    #         cursor.execute("""
+    #             UPDATE players SET 
+    #             name=?, age=?, position=?, fitness=?, goals=?, injury=?, suspension=?
+    #             WHERE jersey=?
+    #         """, (
+    #             entries["Name"].get().strip(),
+    #             int(entries["Age"].get() or 0),
+    #             entries["Position"].get().strip(),
+    #             entries["Fitness"].get().strip(),
+    #             int(entries["Goals"].get() or 0),
+    #             entries["Injury"].get().strip(),
+    #             entries["Suspension"].get().strip(),
+    #             int(jersey_val)
+    #         ))
+            
+    #         conn.commit()
+            
+    #         # Check if the jersey actually existed in the database
+    #         if cursor.rowcount > 0:
+    #             messagebox.showinfo("Success", f"Player #{jersey_val} updated successfully!", parent=window)
+    #         else:
+    #             messagebox.showwarning("Not Found", f"No player found with Jersey #{jersey_val}", parent=window)
+                
+    #         conn.close()
+    #         refresh_table() # Reload the UI table
+            
+    #     except ValueError:
+    #         messagebox.showerror("Error", "Age and Goals must be numbers!", parent=window)
+    #     except Exception as e:
+    #         messagebox.showerror("Error", f"Update failed: {e}", parent=window)
 
     def search_player():
         val = entries["Name"].get().strip()
