@@ -4,13 +4,11 @@ import sqlite3
 
 DB_NAME = "soccer.db"
 
-# ---------------- DATABASE SETUP ----------------
+# DATABASE SETUP
 def setup_team_db():
-    """Initializes the teams table and prepares the players table for assignment."""
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
     try:
-        # Create the teams table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS teams (
                 team_name TEXT PRIMARY KEY,
@@ -19,40 +17,55 @@ def setup_team_db():
                 formation TEXT
             )
         """)
-        # Ensure players table has the team_assigned column
         try:
             cursor.execute("ALTER TABLE players ADD COLUMN team_assigned TEXT")
         except sqlite3.OperationalError:
-            pass # Column already exists
+            pass
         conn.commit()
     except Exception as e:
         print(f"Database Setup Error: {e}")
     finally:
         conn.close()
 
-# ---------------- UI & LOGIC ----------------
-def team_management_page():
+# UI & LOGIC
+def team_management_page(dashboard_root=None):
     setup_team_db()
     
-    root = tk.Tk()
+    # Use Toplevel if dashboard exists, otherwise create a new Tk instance
+    if dashboard_root:
+        root = tk.Toplevel(dashboard_root)
+        dashboard_root.withdraw() # Hide the dashboard
+    else:
+        root = tk.Tk()
+
     root.title("Soccer Pro - Team Management")
     root.geometry("1000x750")
     root.configure(bg="#f4f7f6")
+    
+    def go_back():
+        root.destroy()
+        if dashboard_root:
+            dashboard_root.deiconify() # Bring dashboard back
 
-    # --- HEADER ---
-    header = tk.Frame(root, bg="#2C3E50", height=80)
+    root.protocol("WM_DELETE_WINDOW", go_back)
+
+    #  HEADER
+    header = tk.Frame(root, bg="#2C3E50", height=80)  # Unified header to prevent overlaps
     header.pack(fill="x")
+    
+    tk.Button(header, text="⬅ Back", bg="#7F8C8D", fg="white", font=("Arial", 10, "bold"), 
+              command=go_back).pack(side="left", padx=20, pady=20)
+    
     tk.Label(header, text="TEAM & LINEUP BUILDER", font=("Helvetica", 18, "bold"), 
              fg="white", bg="#2C3E50").pack(pady=20)
 
-    # --- MAIN CONTAINER ---
+    # MAIN CONTAINER
     main_frame = tk.Frame(root, bg="#f4f7f6")
     main_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
-    # ---------------- DATABASE LOGIC FUNCTIONS ----------------
+    # DATABASE LOGIC FUNCTIONS 
     
     def refresh_teams_list():
-        """Reloads the list of teams from the database into the Listbox."""
         team_listbox.delete(0, tk.END)
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
@@ -62,7 +75,6 @@ def team_management_page():
         conn.close()
 
     def load_squad(selected_team):
-        """Filters the squad table to show only players in the selected team."""
         for row in squad_table.get_children():
             squad_table.delete(row)
             
@@ -71,14 +83,12 @@ def team_management_page():
 
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        # Query players assigned to this specific team
         cursor.execute("SELECT jersey, name, position FROM players WHERE team_assigned = ?", (selected_team,))
         for p in cursor.fetchall():
             squad_table.insert("", tk.END, values=p)
         conn.close()
 
     def save_team():
-        """Saves or Updates team details in the database."""
         name = team_entries["Team Name"].get().strip()
         if not name:
             messagebox.showwarning("Input Error", "Team Name is required!")
@@ -86,8 +96,8 @@ def team_management_page():
         
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT OR REPLACE INTO teams VALUES (?, ?, ?, ?)", 
-                       (name, team_entries["Head Coach"].get(), 
+        cursor.execute("INSERT OR REPLACE INTO teams VALUES (?, ?, ?, ?)",
+                       (name, team_entries["Head Coach"].get(),
                         team_entries["Staff Details"].get(), formation_combo.get()))
         conn.commit()
         conn.close()
@@ -95,7 +105,6 @@ def team_management_page():
         refresh_teams_list()
 
     def assign_to_team():
-        """Links a player (via Jersey #) to the currently selected team."""
         selection = team_listbox.curselection()
         if not selection:
             messagebox.showwarning("Selection Error", "Please select a team from the list first!")
@@ -117,12 +126,11 @@ def team_management_page():
         else:
             conn.commit()
             messagebox.showinfo("Success", f"Player #{jersey} joined {selected_team}")
-            load_squad(selected_team) # Refresh squad view
+            load_squad(selected_team)
             assign_entry.delete(0, tk.END)
         conn.close()
 
     def remove_player_from_team():
-        """Unassigns a player from a team, making them a free agent."""
         selected_item = squad_table.focus()
         if not selected_item:
             messagebox.showwarning("Selection", "Click on a player in the squad list to remove them.")
@@ -142,14 +150,12 @@ def team_management_page():
             messagebox.showinfo("Success", f"{name_val} removed from squad.")
 
     def on_team_select(event):
-        """Triggered when a team is clicked in the listbox."""
         selection = team_listbox.curselection()
         if selection:
             team_name = team_listbox.get(selection[0])
             load_squad(team_name)
     
     def delete_team():
-        """Permanently deletes a team and unassigns its players."""
         selection = team_listbox.curselection()
         if not selection:
             messagebox.showwarning("Selection Error", "Please select a team from the list to delete.")
@@ -157,41 +163,27 @@ def team_management_page():
             
         team_name = team_listbox.get(selection[0])
         
-        # Safety confirmation
         if messagebox.askyesno("Confirm Delete", f"Are you sure you want to delete '{team_name}'?\n\nPlayers will become Free Agents."):
             try:
                 conn = sqlite3.connect(DB_NAME)
                 cursor = conn.cursor()
-                
-                # 1. Update players so they are no longer linked to this team
                 cursor.execute("UPDATE players SET team_assigned = NULL WHERE team_assigned = ?", (team_name,))
-                
-                # 2. Delete the team record
                 cursor.execute("DELETE FROM teams WHERE team_name = ?", (team_name,))
-                
                 conn.commit()
                 conn.close()
-                
                 messagebox.showinfo("Deleted", f"Team '{team_name}' has been removed.")
-                
-                # 3. Refresh the UI
                 refresh_teams_list() 
-                # Clear the squad table since the team no longer exists
                 for row in squad_table.get_children():
                     squad_table.delete(row)
-                    
             except Exception as e:
                 messagebox.showerror("Error", f"Failed to delete team: {e}")
 
-    # ---------------- UI LAYOUT ----------------
-
-    # --- LEFT COLUMN: TEAM REGISTRATION ---
+    # --- UI LAYOUT ---
     left_frame = tk.LabelFrame(main_frame, text=" Register/Edit Team ", bg="white", padx=15, pady=15)
     left_frame.grid(row=0, column=0, sticky="nsew", padx=10)
 
     labels = ["Team Name", "Head Coach", "Staff Details"]
     team_entries = {}
-
     for label in labels:
         tk.Label(left_frame, text=label, bg="white").pack(anchor="w", pady=(5, 0))
         ent = tk.Entry(left_frame, font=("Arial", 11), bd=1, relief="solid")
@@ -206,7 +198,6 @@ def team_management_page():
     tk.Button(left_frame, text="💾 Save Team Info", bg="#27AE60", fg="white", 
               font=("Arial", 10, "bold"), command=save_team).pack(fill="x", pady=20)
 
-    # --- RIGHT COLUMN: SQUAD SELECTION ---
     right_frame = tk.LabelFrame(main_frame, text=" Teams & Assignment ", bg="white", padx=15, pady=15)
     right_frame.grid(row=0, column=1, sticky="nsew", padx=10)
 
@@ -222,54 +213,31 @@ def team_management_page():
     tk.Button(right_frame, text="➕ Confirm Assignment", bg="#2980B9", fg="white", 
               font=("Arial", 10, "bold"), command=assign_to_team).pack(fill="x", pady=10)
 
-# ... (Keep database logic functions same as before) ...
+    delete_team_btn = tk.Button(right_frame, text="🗑️ Delete Selected Team", bg="#e67e22", fg="white", 
+                                font=("Arial", 10, "bold"), command=delete_team)
+    delete_team_btn.pack(fill="x", pady=5)
 
-    # --- BOTTOM SECTION: SQUAD TABLE ---
     squad_frame = tk.LabelFrame(main_frame, text=" Current Team Squad ", bg="white", padx=10, pady=10)
     squad_frame.grid(row=1, column=0, columnspan=2, sticky="nsew", pady=15)
 
-    # 1. Create Table
     cols = ("Jersey", "Name", "Position")
     squad_table = ttk.Treeview(squad_frame, columns=cols, show="headings", height=8)
     for col in cols:
         squad_table.heading(col, text=col)
         squad_table.column(col, width=150, anchor="center")
 
-    # 2. Add Scrollbar for Squad
     scrolly = ttk.Scrollbar(squad_frame, orient="vertical", command=squad_table.yview)
     squad_table.configure(yscroll=scrolly.set)
-    
-    # 3. Pack Table and Scrollbar
     squad_table.pack(side="left", fill="both", expand=True)
     scrolly.pack(side="right", fill="y")
 
-    # 4. THE FIX: Place the Remove Button INSIDE the squad_frame
-    # Using pack(side="bottom") ensures it stays within the visible frame
-    remove_btn = tk.Button(
-        squad_frame,
-        text="❌ Remove Selected Player from Team",
-        bg="#c0392b",
-        fg="white",
-        font=("Arial", 10, "bold"),
-        command=remove_player_from_team
-    )
+    remove_btn = tk.Button(squad_frame, text="Remove Selected Player from Team", bg="#c0392b", fg="white",
+                           font=("Arial", 10, "bold"), command=remove_player_from_team)
     remove_btn.pack(side="bottom", fill="x", pady=(10, 0))
 
-    # Place this button where you want it in your layout
-    delete_team_btn = tk.Button(
-        right_frame, 
-        text="🗑️ Delete Selected Team", 
-        bg="#e67e22", # Orange warning color
-        fg="white", 
-        font=("Arial", 10, "bold"), 
-        command=delete_team
-    )
-    delete_team_btn.pack(fill="x", pady=5)
-
-    # --- FINAL CONFIGURATION ---
     main_frame.columnconfigure(0, weight=1)
     main_frame.columnconfigure(1, weight=1)
-    main_frame.rowconfigure(1, weight=1) # Makes the squad area expandable
+    main_frame.rowconfigure(1, weight=1)
 
     refresh_teams_list()
     root.mainloop()

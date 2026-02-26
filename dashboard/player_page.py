@@ -8,7 +8,7 @@ DB_NAME = "soccer.db"
 def create_player_table():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
-    # Fixed: Primary Key should usually be a single unique value like Jersey 
+    # Fixed: Primary Key should usually be a single unique value like Jersey
     # unless you specifically want a composite key.
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS players (
@@ -34,6 +34,14 @@ def open_player_page(root):
     window.title("Player Management")
     window.geometry("1000x750")
     window.config(bg="#f0f4f7")
+    def go_back():
+        window.destroy()
+        root.deiconify()
+
+    back_btn = tk.Button(window, text="⬅ Back", command=go_back, bg="#95a5a6")
+    back_btn.pack(side="top", anchor="nw", padx=10, pady=5)
+    
+    window.protocol("WM_DELETE_WINDOW", go_back)
 
     #TITLE
     tk.Label(window, text="⚽ Player Management", font=("Helvetica", 22, "bold"),bg="#f0f4f7", fg="#2C3E50").pack(pady=15)
@@ -83,11 +91,18 @@ def open_player_page(root):
             conn = sqlite3.connect(DB_NAME)
             cursor = conn.cursor()
             cursor.execute("""
-                INSERT INTO players VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO players 
+                (jersey, name, age, position, fitness, goals, injury, suspension)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
-                int(data["Jersey Number"]), data["Name"], int(data["Age"] or 0),
-                data["Position"], data["Fitness"], int(data["Goals"] or 0),
-                data["Injury"], data["Suspension"]
+                int(data["Jersey Number"]), 
+                data["Name"], 
+                int(data["Age"] or 0),
+                data["Position"], 
+                data["Fitness"], 
+                int(data["Goals"] or 0),
+                data["Injury"], 
+                data["Suspension"]
             ))
             conn.commit()
             conn.close()
@@ -138,49 +153,49 @@ def open_player_page(root):
                 messagebox.showerror("Error", f"Database error: {e}", parent=window)
             conn.close()
     
-    # def update_player():
-    #     # Get the ID (Jersey Number) to know which player to update
-    #     jersey_val = entries["Jersey Number"].get().strip()
+    def update_player():
+        # Get the ID (Jersey Number) to know which player to update
+        jersey_val = entries["Jersey Number"].get().strip()
         
-    #     if not jersey_val:
-    #         messagebox.showwarning("Warning", "Please enter a Jersey Number to update!", parent=window)
-    #         return
+        if not jersey_val:
+            messagebox.showwarning("Warning", "Please enter a Jersey Number to update!", parent=window)
+            return
 
-    #     try:
-    #         conn = sqlite3.connect(DB_NAME)
-    #         cursor = conn.cursor()
+        try:
+            conn = sqlite3.connect(DB_NAME)
+            cursor = conn.cursor()
             
-    #         # SQL UPDATE command targeting the Jersey Number
-    #         cursor.execute("""
-    #             UPDATE players SET 
-    #             name=?, age=?, position=?, fitness=?, goals=?, injury=?, suspension=?
-    #             WHERE jersey=?
-    #         """, (
-    #             entries["Name"].get().strip(),
-    #             int(entries["Age"].get() or 0),
-    #             entries["Position"].get().strip(),
-    #             entries["Fitness"].get().strip(),
-    #             int(entries["Goals"].get() or 0),
-    #             entries["Injury"].get().strip(),
-    #             entries["Suspension"].get().strip(),
-    #             int(jersey_val)
-    #         ))
+            # SQL UPDATE command targeting the Jersey Number
+            cursor.execute("""
+                UPDATE players SET 
+                name=?, age=?, position=?, fitness=?, goals=?, injury=?, suspension=?
+                WHERE jersey=?
+            """, (
+                entries["Name"].get().strip(),
+                int(entries["Age"].get() or 0),
+                entries["Position"].get().strip(),
+                entries["Fitness"].get().strip(),
+                int(entries["Goals"].get() or 0),
+                entries["Injury"].get().strip(),
+                entries["Suspension"].get().strip(),
+                int(jersey_val)
+            ))
             
-    #         conn.commit()
+            conn.commit()
             
-    #         # Check if the jersey actually existed in the database
-    #         if cursor.rowcount > 0:
-    #             messagebox.showinfo("Success", f"Player #{jersey_val} updated successfully!", parent=window)
-    #         else:
-    #             messagebox.showwarning("Not Found", f"No player found with Jersey #{jersey_val}", parent=window)
+            # Check if the jersey actually existed in the database
+            if cursor.rowcount > 0:
+                messagebox.showinfo("Success", f"Player #{jersey_val} updated successfully!", parent=window)
+            else:
+                messagebox.showwarning("Not Found", f"No player found with Jersey #{jersey_val}", parent=window)
                 
-    #         conn.close()
-    #         refresh_table() # Reload the UI table
+            conn.close()
+            refresh_table() # Reload the UI table
             
-    #     except ValueError:
-    #         messagebox.showerror("Error", "Age and Goals must be numbers!", parent=window)
-    #     except Exception as e:
-    #         messagebox.showerror("Error", f"Update failed: {e}", parent=window)
+        except ValueError:
+            messagebox.showerror("Error", "Age and Goals must be numbers!", parent=window)
+        except Exception as e:
+            messagebox.showerror("Error", f"Update failed: {e}", parent=window)
 
     def search_player():
         val = entries["Name"].get().strip()
@@ -206,11 +221,12 @@ def open_player_page(root):
 
     btns = [
         ("Add Player", "#27AE60", add_player),
+        ("Update Player", "#8E44AD", update_player),
+        ("Delete", "#E74C3C", delete_player),
         ("Search", "#F39C12", search_player),
         ("Refresh", "#2980B9", refresh_table),
-        ("Delete", "#E74C3C", delete_player),
         ("Clear Fields", "#7F8C8D", clear_entries)
-    ]
+        ]
 
     for i, (text, color, cmd) in enumerate(btns):
         tk.Button(button_frame, text=text, bg=color, fg="white", font=("Arial", 10, "bold"),width=12, command=cmd).grid(row=0, column=i, padx=5)
