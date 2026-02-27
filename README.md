@@ -25,3 +25,13 @@ Automatically calculate match result (Win, Loss, Draw)
 Calculate and display season win rate
 Delete match records
 Store and retrieve data from SQLite database
+
+Database Structure
+Table Name: matches
+Fields:
+id (Integer, Primary Key, Auto Increment)
+opponent (Text)
+match_date (Text)
+venue (Text)
+team_score (Integer, Default 0)
+opponent_score (Integer, Default 0)
