@@ -10,3 +10,9 @@ To develop a GUI-based desktop application
 To implement CRUD operations (Create, Read, Update, Delete)
 To integrate a relational database using SQLite
 To apply basic logic for sports statistics calculation
+
+Technologies Used
+Python 3
+Tkinter (Graphical User Interface)
+SQLite3 (Database Management)
+Datetime module
