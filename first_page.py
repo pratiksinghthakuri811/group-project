@@ -1,100 +1,146 @@
 import tkinter as tk
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageDraw, ImageFilter
 from login_page import open_login_page
 
-# --- THEME COLORS ---
-WHITE = "#FFFFFF"
-BTN_COLOR = "#333333"
+# ── Colour Palette ──────────────────────────────────────────
+WHITE        = "#FFFFFF"
+GOLD         = "#F0C040"
+LIGHT_BLUE   = "#56CCF2"
+BTN_BG       = "#3498DB"
+BTN_HOVER    = "#2980B9"
+OVERLAY_TOP  = (10, 10, 30, 210)   # deep navy, heavy top
+OVERLAY_BOT  = (0, 0, 0, 160)      # softer black bottom strip
 
-def open_window(parent, title="New Window"):
-    """
-    Opens a Toplevel window and inherits fullscreen/zoomed state from parent.
-    """
-    new_win = tk.Toplevel(parent)
-    new_win.title(title)
-
-    # Inherit fullscreen/zoomed state
-    if str(parent.state()) == "zoomed":
-        new_win.state("zoomed")
-    else:
-        # inherit size if parent is normal
-        new_win.geometry(parent.winfo_geometry())
-
-    # Hide parent
-    parent.withdraw()
-
-    # Show parent again when closing this window
-    def on_close():
-        parent.deiconify()
-        new_win.destroy()
-    new_win.protocol("WM_DELETE_WINDOW", on_close)
-
-    return new_win
-
+# ── Main Window ─────────────────────────────────────────────
 root = tk.Tk()
 root.title("Soccer Management System")
-root.geometry("1100x750")
+root.state("zoomed")
 
-# 1. Setup the Canvas
 canvas = tk.Canvas(root, highlightthickness=0)
 canvas.pack(fill="both", expand=True)
 
-# 2. Global variable for the background image to prevent garbage collection
-bg_photo = None
+bg_photo       = None
 original_image = None
-
 try:
     original_image = Image.open("football.png")
 except Exception as e:
     print(f"Error loading image: {e}")
-    canvas.config(bg="#2C3E50")
+    canvas.config(bg="#0d1b2a")
 
-# 3. Create Objects once (placeholders)
-title_text = canvas.create_text(0, 0, text="Soccer Management System",
-                                font=("Times New Roman", 28, "bold"), fill=WHITE, anchor="nw")
+# ── Static Canvas Elements ───────────────────────────────────
+# Top navbar bar (drawn as a rectangle tag)
+navbar_rect  = canvas.create_rectangle(0, 0, 0, 70, fill="#0d1b2a", outline="", tags="navbar")
 
-welcome_text = canvas.create_text(0, 0, text="WELCOME", 
-                                  font=("Times New Roman", 60, "bold"), fill=WHITE, anchor="center")
+# Brand / logo text  (top-left)
+brand_text   = canvas.create_text(0, 0, anchor="w",
+    text="⚽  SOCCER MANAGEMENT SYSTEM",
+    font=("Arial", 15, "bold"), fill=GOLD, tags="ui")
 
-footer_text = canvas.create_text(0, 0, text="PLEASE LOG IN TO MANAGE PLAYERS, TEAMS, AND MATCHES", 
-                                 font=("Arial", 14, "bold"), fill="#BDC3C7", anchor="center")
+# Divider line under navbar
+divider_line = canvas.create_line(0, 70, 0, 70, fill=LIGHT_BLUE, width=2, tags="ui")
 
-# 4. Button Logic
-def open_login():
-    print("Redirecting...")
+# Big WELCOME heading
+welcome_main = canvas.create_text(0, 0, anchor="center",
+    text="WELCOME", font=("Arial", 72, "bold"), fill=WHITE, tags="ui")
 
-btn_login = tk.Button(root, text="Login", bg=BTN_COLOR, fg=WHITE, 
-                       font=("Arial", 11, "bold"), relief="flat", padx=25, pady=8, command=lambda:  open_login_page(open_window(root, title="Login")))
-login_btn_window = canvas.create_window(0, 0, anchor="ne", window=btn_login)
+# Glowing subtitle line (coloured)
+welcome_sub  = canvas.create_text(0, 0, anchor="center",
+    text="Your All-In-One Soccer Management Platform",
+    font=("Arial", 18, "italic"), fill=LIGHT_BLUE, tags="ui")
 
-# 5. The Magic Function: Resize and Realignment
+# Small description
+desc_text    = canvas.create_text(0, 0, anchor="center",
+    text="Manage Players  •  Build Teams  •  Track Matches",
+    font=("Arial", 13), fill="#d0e8ff", tags="ui")
+
+# Bottom footer bar
+footer_rect  = canvas.create_rectangle(0, 0, 0, 0, fill="#0d1b2a", outline="", tags="footer")
+footer_text  = canvas.create_text(0, 0, anchor="center",
+    text="© 2025 Soccer Management System  |  Please log in to continue",
+    font=("Arial", 10), fill="#7f8c8d", tags="ui")
+
+# ── Login Button ─────────────────────────────────────────────
+def safe_open_login():
+    root.withdraw()
+    open_login_page(root)
+
+btn_login = tk.Button(
+    root, text="  🔑  LOG IN  ", bg=BTN_BG, fg=WHITE,
+    font=("Arial", 13, "bold"), relief="flat",
+    padx=22, pady=10, cursor="hand2",
+    activebackground=BTN_HOVER, activeforeground=WHITE,
+    command=safe_open_login
+)
+btn_login_win = canvas.create_window(0, 0, anchor="ne", window=btn_login, tags="ui")
+
+# Hover effects
+btn_login.bind("<Enter>", lambda e: btn_login.config(bg=BTN_HOVER))
+btn_login.bind("<Leave>", lambda e: btn_login.config(bg=BTN_BG))
+
+# ── Resize / Redraw ──────────────────────────────────────────
 def resize_content(event):
     global bg_photo
-    
-    # Get new dimensions
     w, h = event.width, event.height
-    
-    # Resize background image to fill screen
+    if w < 10 or h < 10:
+        return
+
+    # --- Background with gradient-style dark overlay ---
     if original_image:
-        resized = original_image.resize((w, h))
-        bg_photo = ImageTk.PhotoImage(resized)
-        canvas.delete("bg") # Remove old background
+        resized = original_image.resize((w, h), Image.LANCZOS).convert("RGBA")
+
+        # Top dark band (navbar area)
+        overlay = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+        draw    = ImageDraw.Draw(overlay)
+        draw.rectangle([(0, 0), (w, 75)], fill=(13, 27, 42, 220))
+
+        # Centre vignette to make text pop
+        draw.rectangle([(w//2 - 520, h//2 - 160), (w//2 + 520, h//2 + 140)],
+                        fill=(0, 0, 0, 90))
+
+        # Bottom footer strip
+        draw.rectangle([(0, h - 45), (w, h)], fill=(13, 27, 42, 210))
+
+        combined = Image.alpha_composite(resized, overlay)
+        bg_photo = ImageTk.PhotoImage(combined)
+        canvas.delete("bg")
         canvas.create_image(0, 0, anchor="nw", image=bg_photo, tags="bg")
-        canvas.tag_lower("bg") # Keep it behind everything
+        canvas.tag_lower("bg")
+    else:
+        canvas.config(bg="#0d1b2a")
 
-    # RE-ALIGN EVERYTHING
-    # Title: Keep in top-left
-    canvas.coords(title_text, 30, 30)
-    
-    # Welcome: Always at center
-    canvas.coords(welcome_text, w // 2, h // 2 - 50)
-    
-    # Footer: Always near the bottom
-    canvas.coords(footer_text, w // 2, h - 100)
-    
-    # Login Button: Always at top-right
-    canvas.coords(login_btn_window, w - 30, 30)
+    # --- Reposition all elements ---
+    cx = w // 2
+    cy = h // 2
 
-# Bind the resize event
+    # Navbar bar
+    canvas.coords(navbar_rect, 0, 0, w, 70)
+
+    # Brand text (left-aligned, vertically centred in navbar)
+    canvas.coords(brand_text, 28, 35)
+
+    # Divider
+    canvas.coords(divider_line, 0, 70, w, 70)
+
+    # Main heading — centre of screen, slightly above middle
+    canvas.coords(welcome_main, cx, cy - 60)
+
+    # Subtitle just below
+    canvas.coords(welcome_sub, cx, cy + 30)
+
+    # Description below subtitle
+    canvas.coords(desc_text, cx, cy + 75)
+
+    # Login button — top-right inside navbar
+    canvas.coords(btn_login_win, w - 28, 35)
+
+    # Footer bar + text
+    canvas.coords(footer_rect, 0, h - 45, w, h)
+    canvas.coords(footer_text, cx, h - 22)
+
+    # Keep UI elements on top
+    canvas.tag_raise("ui")
+    canvas.tag_raise("navbar")
+    canvas.tag_raise("footer")
+
 canvas.bind("<Configure>", resize_content)
 root.mainloop()
