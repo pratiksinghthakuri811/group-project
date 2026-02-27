@@ -16,3 +16,12 @@ Python 3
 Tkinter (Graphical User Interface)
 SQLite3 (Database Management)
 Datetime module
+
+System Features
+Schedule new matches
+View all scheduled matches in a table
+Update match scores
+Automatically calculate match result (Win, Loss, Draw)
+Calculate and display season win rate
+Delete match records
+Store and retrieve data from SQLite database
