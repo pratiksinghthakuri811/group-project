@@ -9,10 +9,9 @@ def open_match_management(root):
             widget.lift()
             return
 
-    root.withdraw()  # hide dashboard
     match_window = tk.Toplevel(root)
     match_window.title("Match Management")
-    match_window.geometry("1100x750")
+    match_window.state("zoomed")  # Fullscreen
 
     conn = sqlite3.connect("soccer.db")
     cursor = conn.cursor()
@@ -20,7 +19,6 @@ def open_match_management(root):
     # ---------------- Back Button ----------------
     def go_back():
         match_window.destroy()
-        root.deiconify()
 
     back_btn = tk.Button(match_window, text="⬅ Back to Dashboard", command=go_back, bg="#95a5a6", fg="white")
     back_btn.pack(side="top", anchor="nw", padx=10, pady=10)

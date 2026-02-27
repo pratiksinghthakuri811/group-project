@@ -25,22 +25,21 @@ def create_player_table():
     conn.commit()
     conn.close()
 
-# ---------------- PLAYER PAGE ----------------
+#  PLAYER PAGE
 def open_player_page(root):
     create_player_table()
 
-    # If calling from a main menu, use Toplevel; if standalone, this handles it.
-    window = tk.Toplevel(root) if root else tk.Tk()
+    # if dashboard exist
+    window = tk.Toplevel(root)
     window.title("Player Management")
-    window.geometry("1000x750")
+    window.state("zoomed")  # Fullscreen
     window.config(bg="#f0f4f7")
     def go_back():
         window.destroy()
-        root.deiconify()
 
     back_btn = tk.Button(window, text="⬅ Back", command=go_back, bg="#95a5a6")
     back_btn.pack(side="top", anchor="nw", padx=10, pady=5)
-    
+
     window.protocol("WM_DELETE_WINDOW", go_back)
 
     #TITLE
@@ -136,8 +135,7 @@ def open_player_page(root):
                 
                 # Execute the delete
                 cursor.execute("DELETE FROM players WHERE jersey=?", (jersey_val,))
-                
-                # CRITICAL: This saves the change to the .db file forever
+
                 conn.commit() 
                 
                 # Check if any row was actually deleted in the file
@@ -215,7 +213,7 @@ def open_player_page(root):
             tag = "evenrow" if idx % 2 == 0 else "oddrow"
             player_table.insert("", tk.END, values=player, tags=(tag,))
 
-    # ---------------- BUTTONS ----------------
+    #  BUTTONS
     button_frame = tk.Frame(window, bg="#f0f4f7")
     button_frame.pack(pady=10)
 
@@ -231,7 +229,7 @@ def open_player_page(root):
     for i, (text, color, cmd) in enumerate(btns):
         tk.Button(button_frame, text=text, bg=color, fg="white", font=("Arial", 10, "bold"),width=12, command=cmd).grid(row=0, column=i, padx=5)
 
-    # ---------------- PLAYER TABLE ----------------
+    # PLAYER TABLE
     table_frame = tk.Frame(window)
     table_frame.pack(pady=10, padx=15, fill="both", expand=True)
 
@@ -251,11 +249,3 @@ def open_player_page(root):
     player_table.pack(side="left", fill="both", expand=True)
 
     refresh_table()
-    
-    if not root:
-        window.mainloop()
-
-# ---------------- APP START ----------------
-if __name__ == "__main__":
-    # You can pass None if running this file directly
-    open_player_page(None)

@@ -9,7 +9,6 @@ def open_dashboard(root):
     dashboard = tk.Toplevel(root)
     dashboard.state("zoomed")   # Fullscreen
     dashboard.title("Soccer Management System")
-    dashboard.geometry("1100x750")
     dashboard.configure(bg="#2C3E50")
 
     bg_image_original = Image.open("football.png")
@@ -17,7 +16,7 @@ def open_dashboard(root):
     bg_label = tk.Label(dashboard)
     bg_label.place(x=0, y=0, relwidth=1, relheight=1)
 
-    # --- Global reference for background photo ---
+    # Global reference for background photo
     dashboard.bg_photo = None
 
     def resize_background(event):
@@ -31,7 +30,7 @@ def open_dashboard(root):
 
     dashboard.bind("<Configure>", resize_background)
 
-    # --- Dashboard Title ---
+    # Dashboard Title
     title_label = tk.Label(dashboard,
                            text="Soccer Management System",
                            font=("Helvetica", 32, "bold"),
@@ -39,17 +38,17 @@ def open_dashboard(root):
                            bg="#3498DB")
     title_label.pack(pady=40)
 
-    # --- Navigation Functions ---
+    # Navigation Functions
     def navigate(func):
-        dashboard.withdraw()
-        func(dashboard)
+        func(dashboard)  # Open sub-page without hiding dashboard
 
     def logout():
         if messagebox.askyesno("Logout", "Are you sure?"):
             dashboard.destroy()
-            root.deiconify()
+            from login_page import open_login_page
+            open_login_page(root)
 
-    # --- Buttons ---
+    # Buttons
     btn_logout = tk.Button(dashboard, text="Logout ⏻", bg="#E74C3C",
                            fg="white", font=("Arial", 10, "bold"), command=logout)
     btn_logout.place(relx=1.0, x=-20, y=20, anchor="ne")

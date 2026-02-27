@@ -4,7 +4,7 @@ import sqlite3
 
 DB_NAME = "soccer.db"
 
-# DATABASE SETUP
+# DATABASE 
 def setup_team_db():
     conn = sqlite3.connect(DB_NAME)
     cursor = conn.cursor()
@@ -27,25 +27,18 @@ def setup_team_db():
     finally:
         conn.close()
 
-# UI & LOGIC
+# UI
 def team_management_page(dashboard_root=None):
     setup_team_db()
     
-    # Use Toplevel if dashboard exists, otherwise create a new Tk instance
-    if dashboard_root:
-        root = tk.Toplevel(dashboard_root)
-        dashboard_root.withdraw() # Hide the dashboard
-    else:
-        root = tk.Tk()
-
+    # if dashboard exists
+    root = tk.Toplevel(dashboard_root)
     root.title("Soccer Pro - Team Management")
-    root.geometry("1000x750")
+    root.state("zoomed")  # Fullscreen
     root.configure(bg="#f4f7f6")
     
     def go_back():
         root.destroy()
-        if dashboard_root:
-            dashboard_root.deiconify() # Bring dashboard back
 
     root.protocol("WM_DELETE_WINDOW", go_back)
 
@@ -63,7 +56,7 @@ def team_management_page(dashboard_root=None):
     main_frame = tk.Frame(root, bg="#f4f7f6")
     main_frame.pack(fill="both", expand=True, padx=20, pady=10)
 
-    # DATABASE LOGIC FUNCTIONS 
+    # DATABASE LOGIC FUNCTIONS
     
     def refresh_teams_list():
         team_listbox.delete(0, tk.END)
@@ -240,7 +233,3 @@ def team_management_page(dashboard_root=None):
     main_frame.rowconfigure(1, weight=1)
 
     refresh_teams_list()
-    root.mainloop()
-
-if __name__ == "__main__":
-    team_management_page()
