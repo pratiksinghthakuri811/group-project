@@ -42,3 +42,11 @@ The system stores match details in the database.
 Scores can be updated after the match.
 The system automatically determines the result.
 Win rate is calculated based on stored match records.
+
+How to Run the Project
+Install Python 3 on your system.
+Ensure Tkinter is available (comes pre-installed with Python).
+Save the project file in a folder.
+Open terminal or command prompt in that folder.
+Run the following command:
+python filename.py
