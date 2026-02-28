@@ -27,3 +27,15 @@ To make team management simple and digita
 📅 Manage match schedules
 
 📊 View team and player records
+
+Programming Language: Python  
+
+Database: SQL
+
+Tools:
+
+Draw.io (for diagrams)
+
+Google Docs (for documentation)
+
+Discord (for team communication)
