@@ -35,3 +35,10 @@ match_date (Text)
 venue (Text)
 team_score (Integer, Default 0)
 opponent_score (Integer, Default 0)
+
+System Workflow
+User enters opponent name, match date, and venue.
+The system stores match details in the database.
+Scores can be updated after the match.
+The system automatically determines the result.
+Win rate is calculated based on stored match records.
