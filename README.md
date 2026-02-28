@@ -50,3 +50,15 @@ Save the project file in a folder.
 Open terminal or command prompt in that folder.
 Run the following command:
 python filename.py
+
+Result Logic
+If team_score > opponent_score → Win
+If team_score < opponent_score → Loss
+If team_score = opponent_score → Draw
+Win Rate Formula:
+Win Rate = (Total Wins / Total Matches) × 100
+
+Limitations
+No user authentication system
+No advanced statistics or analytics
+Runs locally (no online access)
