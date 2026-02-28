@@ -1,14 +1,16 @@
-# &nbsp;About Project
+#  About Project
+
+##  Features
+
+### 
+
+###  Player Management
 
 
 
+1)Add, update, delete and search players
 
+2\) Store player details including jersey number, name, age, position, fitness, goals, injury and suspension status
 
-# Technologies used in this project
-
-# Python 3 — core programming language
-
-# Tkinter — graphical user interface
-
-# SQLite3 — local database storage
+3\) Duplicate jersey number detection
 
