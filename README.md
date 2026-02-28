@@ -30,7 +30,7 @@
 
 
 
-### &nbsp;Match Management
+###  Match Management
 
 
 
@@ -55,5 +55,25 @@
 
 
 
+### &nbsp;How to Run
 
+
+
+1. Make sure Python 3 is installed on your computer
+2. Clone or download this repository
+3. Open a terminal in the project folder
+   
+4. Run the main file:
+
+
+
+**python main.py**
+
+
+
+### Database
+
+
+
+The app automatically creates a soccer.db SQLite database file on first run. No external database setup is needed.
 
