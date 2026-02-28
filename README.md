@@ -18,7 +18,7 @@
 
 
 
-### &nbsp;Team Management
+###  Team Management
 
 
 
@@ -27,3 +27,33 @@
 3. Assign players to teams using jersey numbers
 4. Remove players from squads
 5. Delete teams and automatically release players as free agents
+
+
+
+### &nbsp;Match Management
+
+
+
+1. Schedule upcoming matches with opponent, date and venue
+2. Update match scores after games
+3. Automatically calculate WIN, LOSS or DRAW results
+4. Track season win rate in real time
+
+### 
+
+### Technologies Used
+
+
+
+1. Python 3 — core programming language
+2. Tkinter — graphical user interface
+3. SQLite3 — local database storage
+
+
+
+
+
+
+
+
+
