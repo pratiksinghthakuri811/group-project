@@ -13,3 +13,17 @@ To store and update player information.
 To manage match records.
 
 To make team management simple and digita
+
+🛠️ Features
+
+➕ Add new teams
+
+📝 Update team details
+
+❌ Delete team information
+
+👤 Add and manage players
+
+📅 Manage match schedules
+
+📊 View team and player records
