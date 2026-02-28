@@ -38,4 +38,10 @@ Draw.io (for diagrams)
 
 Google Docs (for documentation)
 
+
+
+👨‍💻 Developed By
+
+Pratik Thakuri
+
 Discord (for team communication)
