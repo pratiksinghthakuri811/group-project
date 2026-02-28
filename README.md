@@ -62,3 +62,13 @@ Limitations
 No user authentication system
 No advanced statistics or analytics
 Runs locally (no online access)
+
+Future Improvements
+Add player performance tracking
+Add graphical statistics representation
+Implement login system
+Export match data to CSV or PDF
+Add search and filter functionality
+
+Conclusion
+This project demonstrates the implementation of a GUI-based management system using Python and SQLite. It applies database connectivity, logical processing, and user interface design concepts suitable for a Bachelor-level academic project.
